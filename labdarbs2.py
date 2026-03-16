@@ -18,27 +18,27 @@ img_dark = load_rgb_from_url(url_dark)
 img_bright = load_rgb_from_url(url_bright)
 img_gray = load_rgb_from_url(url_gray)
 
-def gamma_correction(img, gamma):
-    img_f = img.astype(np.float32) / 255.0
-    result = np.power(img_f, gamma)
-    return np.clip(result * 255, 0, 255).astype(np.uint8)
+def log_correction(img):
+    img_f = img.astype(np.float32)
+    c = 255 / np.log(1 + 255)
+    result = c * np.log(1 + img_f)
+    return np.clip(result, 0, 255).astype(np.uint8)
 
-def linear_contrast_stretch(img):
+def histogram_equalization(img):
     result = np.zeros_like(img)
 
     for c in range(3):  # RGB kanāli
-        channel = img[:, :, c].astype(np.float32)
-        c_min = channel.min()
-        c_max = channel.max()
+        channel = img[:, :, c]
+        hist, bins = np.histogram(channel.flatten(), 256, [0, 256])
+        cdf = hist.cumsum()
+        cdf_masked = np.ma.masked_equal(cdf, 0)
 
-        if c_max > c_min:
-            stretched = (channel - c_min) / (c_max - c_min) * 255
-        else:
-            stretched = channel
+        cdf_masked = (cdf_masked - cdf_masked.min()) * 255 / (cdf_masked.max() - cdf_masked.min())
+        cdf_final = np.ma.filled(cdf_masked, 0).astype(np.uint8)
 
-        result[:, :, c] = np.clip(stretched, 0, 255)
+        result[:, :, c] = cdf_final[channel]
 
-    return result.astype(np.uint8)
+    return result
 
 def plot_histogram(img, title):
     colors = ['red', 'green', 'blue']
@@ -54,9 +54,9 @@ def plot_histogram(img, title):
     plt.ylabel("Pikseļu skaits")
     plt.show()
 
-def show_results(img, title, gamma_value):
-    img_gamma = gamma_correction(img, gamma_value)
-    img_linear = linear_contrast_stretch(img)
+def show_results(img, title):
+    img_log = log_correction(img)
+    img_hist = histogram_equalization(img)
 
     fig = plt.figure(figsize=(15, 5))
     axs = [fig.add_subplot(1, 3, i+1) for i in range(3)]
@@ -64,11 +64,11 @@ def show_results(img, title, gamma_value):
     axs[0].imshow(img)
     axs[0].set_title(f"{title} - Oriģināls")
 
-    axs[1].imshow(img_gamma)
-    axs[1].set_title(f"{title} - Gamma korekcija")
+    axs[1].imshow(img_log)
+    axs[1].set_title(f"{title} - Logaritmiskā korekcija")
 
-    axs[2].imshow(img_linear)
-    axs[2].set_title(f"{title} - Lineārā pārveidošana")
+    axs[2].imshow(img_hist)
+    axs[2].set_title(f"{title} - Histogrammas izlīdzināšana")
 
     for ax in axs:
         ax.axis("off")
@@ -77,9 +77,9 @@ def show_results(img, title, gamma_value):
     plt.show()
 
     plot_histogram(img, f"{title} - Histogramma pirms korekcijas")
-    plot_histogram(img_gamma, f"{title} - Histogramma pēc gamma korekcijas")
-    plot_histogram(img_linear, f"{title} - Histogramma pēc lineārās pārveidošanas")
+    plot_histogram(img_log, f"{title} - Histogramma pēc logaritmiskās korekcijas")
+    plot_histogram(img_hist, f"{title} - Histogramma pēc histogrammas izlīdzināšanas")
 
-show_results(img_dark, "Pārtumšots attēls", gamma_value=0.6)
-show_results(img_bright, "Pārgaismots attēls", gamma_value=1.5)
-show_results(img_gray, "Pelēcīgs attēls", gamma_value=0.8)
+show_results(img_dark, "Pārtumšots attēls")
+show_results(img_bright, "Pārgaismots attēls")
+show_results(img_gray, "Pelēcīgs attēls")
