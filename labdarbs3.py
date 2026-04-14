@@ -2,6 +2,16 @@
 IMAGE_URL_1 = "https://cdn.britannica.com/16/277116-050-AE9CDB07/Lamine-Yamal-Scores-For-FC-Barcelona-In-LaLiga-2025-Clash-Against-Rayo-Vallecano-Madrid.jpg"
 IMAGE_URL_2 = "https://assets.goal.com/images/v3/blt6d05eb02265c690f/GOAL_-_Blank_WEB_-_Facebook_-_2023-09-26T201135.941.png?auto=webp&format=pjpg&width=3840&quality=60"
 
+from IPython.display import display, HTML
+display(HTML("""
+<style>
+  div.output_area, div.output_subarea, figure, img, .output_png {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+</style>
+"""))
+
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
