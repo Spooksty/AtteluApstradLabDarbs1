@@ -11,11 +11,11 @@ IMAGE_URL_2 = "https://hips.hearstapps.com/hmg-prod/images/ferrari-e-suv-2-copy-
 IMAGE_URL_3 = "https://assets.goal.com/images/v3/blt411f83ea5a5aca9d/06.gif?auto=webp&format=pjpg&width=3840&quality=60"
 
 
-def load_image_from_url(url, resize_to=(400, 400)):
+def load_image_from_url(url, max_size=(350, 350)):
     headers = {"User-Agent": "Mozilla/5.0"}
     response = requests.get(url, headers=headers, timeout=15)
     img = Image.open(BytesIO(response.content)).convert("RGB")
-    img = img.resize(resize_to, Image.LANCZOS)
+    img.thumbnail(max_size)
     return np.array(img)
 
 
