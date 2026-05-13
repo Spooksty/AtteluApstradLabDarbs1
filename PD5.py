@@ -66,19 +66,6 @@ def kmeans_segmentation(img, k=3):
   return segmented_img
 
 
-def kmeans_cluster_stats(img, k=3):
-    pixels = img.reshape((-1, 3))
-
-    kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
-    labels = kmeans.fit_predict(pixels)
-
-    unique, counts = np.unique(labels, return_counts=True)
-    total = labels.size
-
-    percentages = counts / total * 100
-
-    return unique, counts, percentages
-
 BLOCK_SIZE = 35
 C = 5
 K = 8
