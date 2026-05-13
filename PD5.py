@@ -66,7 +66,7 @@ def kmeans_segmentation(img, k=3):
   return segmented_img
 
 
-BLOCK_SIZE = 35
+BLOCK_SIZE = 9
 C = 5
 K = 8
 
